@@ -18,10 +18,14 @@ String incomingByte ; // for incoming serial data
 RF24 radio(7, 8);               // nRF24L01 (CE,CSN)
 RF24Network network(radio); 
 String amine;
+String amine2;
 int counter =0;
 char message[32];
+char outmessage[32];
 int attemptCounter;
-
+        String off="BLOFF";
+        String on="BLON";
+        String command;
 void setup()
 {
   Serial.begin(9600);
@@ -38,61 +42,76 @@ void setup()
   delay(50);                       // wait for a second
   digitalWrite(5, LOW);  
   pinMode(13, OUTPUT);
+  Serial.println("began"); 
 
     
 
 }
 
+struct Payload{
+  char pl[64];
+  int counter;
+};
+
+Payload payload;
+
+Payload payload2;
+
 
 void loop()
 {
-  attemptCounter=0;
-  counter++;
-  network.update();
-  //===== Receiving =====//
-  while ( network.available() ) {     // Is there any incoming data?
-    RF24NetworkHeader header;
-    char message[32];
-    network.read(header, &message, sizeof(message)); // Read the incoming data
-    counterReceived++;
-    Serial.println(message);    
-    digitalWrite(5, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(50);                       // wait for a second
-    digitalWrite(5, LOW);  
-    }
-    if (Serial.available() > 0) {
-    // read the incoming byte:
-        amine = Serial.readString();
-        Serial.println(amine);
-        amine.toCharArray(message, 32);
+        delay(1000);
+        while (Serial.available()) {
+            delay(2);  //delay to allow byte to arrive in input buffer
+            command = Serial.readStringUntil('\n');
+            command.toCharArray(payload2.pl,32);
+            RF24NetworkHeader header2(accesspoint1); 
+            if(!network.write(header2, &payload2, sizeof(payload2))){
+              delay(200);
+              bool ok = network.write(header2, &payload2, sizeof(payload2));
+            }
+        }
+        
+
         network.update();
-        RF24NetworkHeader header(accesspoint1); 
-        bool ok = network.write(header, &message, sizeof(message));
-        Serial.println(ok);
+        attemptCounter=0;
+        counter++;
+      //===== Receiving =====//
+      while ( network.available() ) {     // Is there any incoming data?
+        RF24NetworkHeader header;
+        char message[32];
+        network.read(header, &payload, sizeof(payload)); // Read the incoming data
+        counterReceived++;
+        Serial.println(String(payload.pl));
+       // digitalWrite(5, HIGH);   // turn the LED on (HIGH is the voltage level)
+       // delay(200);                       // wait for a second
+       // digitalWrite(5, LOW);  
+        }
+  
+
+    /*if (Serial.available() > 0) {
+        amine = Serial.readString();
+        amine.toCharArray(payload2.sender, 32);
+        RF24NetworkHeader header2(slaveNode1);
+        bool ok = network.write(header2, &payload2, sizeof(payload2));
         while(!ok){
           attemptCounter++;
           Serial.println("sending again");
-          delay(1000);
-          ok = network.write(header, &message, sizeof(message));
+          ok = network.write(header2, &payload2, sizeof(payload2));
           Serial.println(ok);
           if(attemptCounter>10){
              Serial.print("node is unreacheable");
              digitalWrite(5, HIGH);   // turn the LED on (HIGH is the voltage level)
-                delay(5000);                       // wait for a second
-                digitalWrite(5, LOW); 
-              break;
+             delay(1000);                       // wait for a second
+             digitalWrite(5, LOW); 
+             break;
                 
           }
         }
         Serial.print("received");
-  
+  */
    
  
-  }
-  delay(1000);
+  }    
 
   
-
-  
-  
-}

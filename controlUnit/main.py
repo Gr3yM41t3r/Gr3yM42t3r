@@ -3,7 +3,7 @@ import serial
 import time
 import time
 
-arduino = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=.1)
+arduino = serial.Serial(port='/dev/ttyUSB1', baudrate=9600, timeout=.1)
 
 
 def write_read(x):
@@ -15,20 +15,25 @@ def write_read(x):
 response = False
 
 while True:
+    counter2=0
     message = input("type message")
     arduino.write(bytes(message, 'utf-8'))
     response = False
     while not response:
+        counter2 += 1
         time.sleep(1)
         print(arduino.inWaiting())
         while arduino.inWaiting() > 0:
             value = arduino.readline().decode('utf-8')
-            print(value)
+            print(arduino.inWaiting())
             if value == "received":
                 response = True
             elif value =="node is unreacheable":
                 response = True
                 print("ERROR-------------------------")
+            elif counter2>10:
+                response = True
+
 
 """
     while not response:

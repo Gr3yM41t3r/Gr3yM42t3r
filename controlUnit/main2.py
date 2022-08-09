@@ -2,8 +2,9 @@
 import serial
 import time
 import time
+import csv
 
-arduino = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=.1)
+arduino = serial.Serial(port='/dev/ttyUSB1', baudrate=9600, timeout=.1)
 
 
 def write_read(x):
@@ -13,17 +14,27 @@ def write_read(x):
 
 
 response = False
+with open("out.csv", "w") as outputData:
+    writer = csv.writer(outputData)
+    data=[]
+    while True:
+            while arduino.inWaiting() > 0:
+                data.clear()
+                value = arduino.readline().decode('utf-8')
+                print(value)
+                if len(value.split(";"))>3:
+                    a=int(value.split(";")[3])
+                    print(value.split(";")[1])
+                    print(str(a))
+                    data.append(int(value.split(";")[1]))
+                    data.append(a)
+                    writer.writerow(data)
 
-while True:
-
-        while arduino.inWaiting() > 0:
-            value = arduino.readline().decode('utf-8')
-            print(value)
-            if value == "received":
-                response = True
-            elif value =="node is unreacheable":
-                response = True
-                print("ERROR-------------------------")
+                if value == "received":
+                    response = True
+                elif value =="node is unreacheable":
+                    response = True
+                    print("ERROR-------------------------")
 
 """
     while not response:

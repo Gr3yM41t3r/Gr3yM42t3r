@@ -16,11 +16,11 @@
 RF24 radio(7, 8);               // nRF24L01 (CE,CSN)
 RF24Network network(radio);      // Include the radio in the network
 
-const uint16_t this_node = 01;   // Address of our node in Octal format ( 04,031, etc)
+const uint16_t this_node = 011;   // Address of our node in Octal format ( 04,031, etc)
 const uint16_t master00 = 00;    // Address of the other node in Octal format
 int counter = 0;
 char message[32] = ";"; ;
-String stringOne = "20;30;40;50;";
+String stringOne = "amine";
 String abc;
 char buffer2[5];
 
@@ -28,6 +28,23 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 
 uint32_t delayMS;
 
+
+
+struct student{
+   String name;
+   int age;
+   int roll_no;
+};
+
+struct Payload{
+  char sender[32];
+  int counter;
+};
+
+
+Payload payload;
+
+Payload payload2;
 void setup() {
   SPI.begin();
   radio.begin();
@@ -48,44 +65,43 @@ void setup() {
 
 void loop() {
 
-  // Get temperature event and print its value.
-  sensors_event_t event;
-  dht.temperature().getEvent(&event);
-  Serial.print(F("Temperature: "));
-  Serial.print(event.temperature);
-  Serial.println(F("°C"));
-  dht.humidity().getEvent(&event);
-  Serial.print(F("Humidity: "));
-  Serial.print(event.relative_humidity);
-  Serial.println(F("%"));
 
-  
- // abc = stringOne + counter;
-  //abc.toCharArray(message, 32);
-  abc="temp: "+ String(event.temperature) +" hum: "+String(event.relative_humidity);
-  abc.toCharArray(message, 32);
+  /*String(this_node).toCharArray(payload.sender,32);
+  payload.counter=counter;
   network.update();
   RF24NetworkHeader header(master00);     // (Address where the data is going)
-  bool ok = network.write(header, &message, sizeof(message)); //
-  Serial.println(ok);
-  delay(2500);
+  bool ok = network.write(header, &payload, sizeof(payload)); //
+  
+     while(!ok){
+         ok = network.write(header, &payload, sizeof(payload));
+      }
+   Serial.println(payload.sender);
+   Serial.println(payload.counter);
+
+  delay(1000);
   counter++;
-  /*network.update();
+  
+*/
+
+  
+  network.update();
   //===== Receiving =====//
-  while ( network.available() ) {     // Is there any incoming data?
+  while ( network.available() ) {  
+     Serial.println("33333333333dfoqsokmdklj3");// Is there any incoming data?
     RF24NetworkHeader header;
     char message[32];
-    network.read(header, &message, sizeof(message)); // Read the incoming data
-    Serial.println(String(message)); 
-    if(String(message)=="ON"){
-      
-    digitalWrite(4, HIGH);   // turn the LED on (HIGH is the voltage level)
-
-    }else if (String(message)=="OFF"){
-            // wait for a second
-    digitalWrite(4, LOW); 
-
+    network.read(header, &payload2, sizeof(payload2)); // Read the incoming data
+     Serial.println(String(payload2.sender));
+    if(String(payload2.sender)=="ON"){
+        digitalWrite(5, HIGH);
+    }else{
+    digitalWrite(5, LOW); 
     }
+      // turn the LED on (HIGH is the voltage level)
+   
 
-    }*/
+    } 
+    
+
+    
 }
